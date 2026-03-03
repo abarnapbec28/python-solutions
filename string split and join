@@ -1,0 +1,17 @@
+def split_and_join(line):
+  """
+  Splits a string on a space delimiter and joins the resulting words using a hyphen.
+
+  Args:
+      line: A string of space-separated words.
+
+  Returns:
+      The resulting string with hyphens replacing spaces.
+  """
+  words = line.split(" ")
+  result = "-".join(words)
+  return result
+if __name__ == '__main__':
+    line = input()
+    result = split_and_join(line)
+    print(result)
