@@ -1,0 +1,14 @@
+temperature = "Warm" 
+humidity = "Dry"   
+if temperature == "Warm":
+    if humidity == "Dry":
+        print("Play Basketball")
+    elif humidity == "Humid":
+        print("Play Tennis")
+elif temperature == "Cold":
+    if humidity == "Dry":
+        print("Play Cricket")
+    elif humidity == "Humid":
+        print("Swim")
+else:
+    print("Invalid temperature")
