@@ -1,0 +1,28 @@
+from collections import defaultdict
+def solve():
+    try:
+        n_m = input().split()
+        n = int(n_m[0])
+        m = int(n_m[1])
+    except (IOError, ValueError, IndexError):
+        return
+    d = defaultdict(list)
+    for i in range(1, n + 1):
+        try:
+            word_a = input()
+            d[word_a].append(str(i)) 
+        except (IOError, EOFError):
+            break
+
+    for _ in range(m):
+        try:
+            word_b = input()
+            if word_b in d:
+                print(" ".join(d[word_b]))
+            else:
+                print("-1")
+        except (IOError, EOFError):
+            break
+
+if __name__ == '__main__':
+    solve()
