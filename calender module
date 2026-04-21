@@ -1,0 +1,8 @@
+import datetime
+input_date = input().split()
+month = int(input_date[0])
+day = int(input_date[1])
+year = int(input_date[2])
+date_obj = datetime.date(year, month, day)
+day_of_week = date_obj.strftime('%A').upper()
+print(day_of_week)
