@@ -1,0 +1,95 @@
+#include <stdlib.h>
+#include <string.h>
+
+// Comparison function for qsort to sort characters within a string alphabetically
+int compareChars(const void* a, const void* b) {
+    return (*(char*)a - *(char*)b);
+}
+
+// Structure to represent a node in our custom hash table
+typedef struct {
+    char* sortedKey;      // The sorted version of the string used as the key
+    int* originalIndices; // Array storing the indices of original strings matching this key
+    int count;           // Current number of strings in this bucket
+    int capacity;        // Allocated capacity of this bucket
+} HashNode;
+
+// Simple custom hash function for strings
+unsigned int getHash(const char* str, int tableSize) {
+    unsigned int hash = 5381;
+    while (*str) {
+        hash = ((hash << 5) + hash) + *str++;
+    }
+    return hash % tableSize;
+}
+
+char*** groupAnagrams(char** strs, int strsSize, int* returnSize, int** returnColumnSizes) {
+    if (strsSize == 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+
+    // Allocate a hash table large enough to minimize collisions
+    int tableSize = strsSize * 2;
+    HashNode* hashTable = (HashNode*)calloc(tableSize, sizeof(HashNode));
+    int uniqueKeysCount = 0;
+
+    // Temporary buffer to hold the sorted key of the current string
+    char sortedBuffer[101];
+
+    for (int i = 0; i < strsSize; i++) {
+        strcpy(sortedBuffer, strs[i]);
+        qsort(sortedBuffer, strlen(sortedBuffer), sizeof(char), compareChars);
+
+        // Find or insert the sorted key into the hash table
+        unsigned int hashIdx = getHash(sortedBuffer, tableSize);
+        while (hashTable[hashIdx].sortedKey != NULL && strcmp(hashTable[hashIdx].sortedKey, sortedBuffer) != 0) {
+            hashIdx = (hashIdx + 1) % tableSize; // Linear probing
+        }
+
+        // Case 1: Key does not exist in the hash table yet
+        if (hashTable[hashIdx].sortedKey == NULL) {
+            hashTable[hashIdx].sortedKey = strdup(sortedBuffer);
+            hashTable[hashIdx].capacity = 4;
+            hashTable[hashIdx].originalIndices = (int*)malloc(hashTable[hashIdx].capacity * sizeof(int));
+            hashTable[hashIdx].count = 0;
+            uniqueKeysCount++;
+        }
+
+        // Case 2: Resize indices bucket if it runs out of capacity
+        if (hashTable[hashIdx].count >= hashTable[hashIdx].capacity) {
+            hashTable[hashIdx].capacity *= 2;
+            hashTable[hashIdx].originalIndices = (int*)realloc(hashTable[hashIdx].originalIndices, hashTable[hashIdx].capacity * sizeof(int));
+        }
+
+        // Store the original string's index in the matching key's bucket
+        hashTable[hashIdx].originalIndices[hashTable[hashIdx].count++] = i;
+    }
+
+    // Prepare the final response structures required by LeetCode
+    *returnSize = uniqueKeysCount;
+    char*** result = (char***)malloc(uniqueKeysCount * sizeof(char**));
+    *returnColumnSizes = (int*)malloc(uniqueKeysCount * sizeof(int));
+
+    int resultIdx = 0;
+    for (int i = 0; i < tableSize; i++) {
+        if (hashTable[i].sortedKey != NULL) {
+            int currentBucketSize = hashTable[i].count;
+            (*returnColumnSizes)[resultIdx] = currentBucketSize;
+            
+            // Allocate string array pointers for the anagram group
+            result[resultIdx] = (char**)malloc(currentBucketSize * sizeof(char*));
+            for (int j = 0; j < currentBucketSize; j++) {
+                result[resultIdx][j] = strs[hashTable[i].originalIndices[j]];
+            }
+            
+            // Clean up bucket memory
+            free(hashTable[i].sortedKey);
+            free(hashTable[i].originalIndices);
+            resultIdx++;
+        }
+    }
+    
+    free(hashTable);
+    return result;
+}
