@@ -1,0 +1,25 @@
+#include <stdlib.h>
+
+int firstMissingPositive(int* nums, int numsSize) {
+    // Step 1: Place each number in its right place if possible.
+    // A number 'x' belongs at index 'x - 1' (e.g., 1 belongs at index 0).
+    for (int i = 0; i < numsSize; i++) {
+        while (nums[i] > 0 && nums[i] <= numsSize && nums[nums[i] - 1] != nums[i]) {
+            // Swap nums[i] with the element at its correct target index
+            int targetIdx = nums[i] - 1;
+            int temp = nums[i];
+            nums[i] = nums[targetIdx];
+            nums[targetIdx] = temp;
+        }
+    }
+    
+    // Step 2: Scan the array to find the first index that doesn't match its value.
+    for (int i = 0; i < numsSize; i++) {
+        if (nums[i] != i + 1) {
+            return i + 1; // Found the missing positive integer
+        }
+    }
+    
+    // Step 3: If all positions are correct, the missing integer is numsSize + 1.
+    return numsSize + 1;
+}
